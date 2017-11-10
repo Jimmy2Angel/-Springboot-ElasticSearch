@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>thymeleaf learning</title>
+</head>
+<body>
+<div style="text-align: center;margin:0 auto;width: 1000px; ">
+    <h1>学习资源大奉送，爱我就关注嘟嘟公众号：嘟爷java超神学堂（javaLearn）</h1>
+    <table width="100%" border="1" cellspacing="1" cellpadding="0">
+        <tr>
+            <td>作者</td>
+            <td>教程名称</td>
+            <td>地址</td>
+        </tr>
+        <!--/*@thymesVar id="learnList" type=""*/-->
+        <tr th:each="article : ${articles}">
+            <div th:object="${article}">
+            <td th:text="*{author.name}">嘟嘟MD</td>
+            <td th:text="*{title}">SpringBoot干货系列</td>
+            <td><a th:href="@{'/article/findById/' + *{id}}" target="_blank">点我</a></td>
+            </div>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
