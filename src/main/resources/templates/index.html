@@ -1,27 +1,71 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
 <head>
     <meta charset="UTF-8"/>
     <title>thymeleaf learning</title>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}"/>
 </head>
 <body>
-<div style="text-align: center;margin:0 auto;width: 1000px; ">
-    <h1>学习资源大奉送，爱我就关注嘟嘟公众号：嘟爷java超神学堂（javaLearn）</h1>
-    <table width="100%" border="1" cellspacing="1" cellpadding="0">
-        <tr>
-            <td>作者</td>
-            <td>教程名称</td>
-            <td>地址</td>
-        </tr>
-        <!--/*@thymesVar id="learnList" type=""*/-->
-        <tr th:each="article : ${articles}">
-            <div th:object="${article}">
-            <td th:text="*{author.name}">嘟嘟MD</td>
-            <td th:text="*{title}">SpringBoot干货系列</td>
-            <td><a th:href="@{'/article/findById/' + *{id}}" target="_blank">点我</a></td>
-            </div>
-        </tr>
-    </table>
+<div style="text-align: left;margin:0 auto;width: 1000px; ">
+    <input id="search" style="margin-top: 10px;height: 42px; width: 664px; font-size: 18px" placeholder="请输入文章标题进行检索"/>
+    <div id="articleList">
+
+    </div>
+    <div id="page"></div>
 </div>
+<script type="text/javascript" th:src="@{/layui/layui.js}"></script>
+<script type="text/javascript">
+    var $, laytpl, form, layer, table, laypage, element, initPageNum=1;
+    layui.use(['laytpl', 'form','layer', 'table', 'laypage', 'element','jquery'], function(){
+        $ = layui.jquery, laytpl = layui.laytpl, form = layui.form, layer = layui.layer, table = layui.table, laypage = layui.laypage, element = layui.element;
+        putData(1, null);
+        $('#search').bind('keypress',function(event){
+            if(event.keyCode == "13") {
+                $("#articleList").html("");
+                putData(1, $("#search").val());
+            }
+        });
+    });
+    function putData(pageNum, searchContent) {
+        $.getJSON( '/es/article/getByPage', {
+            searchContent: searchContent,
+            pageNum: pageNum //向服务端传的参数
+        }, function (res) {
+            var data = res.data;
+            console.log(data);
+            initPageNum = res.pageNum;
+            // var myObject = JSON.parse(data);
+            //自定义样式
+            laypage.render({
+                elem: 'page'
+                , count: res.total
+                , theme: '#1E9FFF'
+                , curr: res.pageNum
+                , layout: [ 'prev', 'page', 'next', 'skip']
+                , groups: 3 //连续显示分页数
+                , jump: function (obj, first) {
+                    if (!first) {
+                        putData(obj.curr);
+                    }
+                }
+            });
+            var html='',title='',abstracts='';
+            $.each(data, function (n, value) {
+                title = '<a href="/es/article/'+value.id+'"><h3 style="display: block;\n' +
+                    '    font-size: 1.17em;\n' +
+                    '    -webkit-margin-before: 1em;\n' +
+                    '    -webkit-margin-after: 1em;\n' +
+                    '    -webkit-margin-start: 0px;\n' +
+                    '    -webkit-margin-end: 0px;\n' +
+                    '    font-weight: bold;">' + value.title + '</h3></a>';
+                abstracts = '<div style="line-height: 1.4;\n' +
+                    '    word-wrap: break-word;"><span>'+value.abstracts+'</span></div>';
+                html+=(title+abstracts);
+            });
+            $("#articleList").append(html);
+        });
+    };
+
+</script>
 </body>
 </html>

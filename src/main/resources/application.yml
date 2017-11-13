@@ -1,4 +1,6 @@
-server.port: 8090
+server:
+  port: 8090
+  context-path: /es
 spring:
    data:
       elasticsearch:
@@ -9,5 +11,5 @@ spring:
             logs: ./elasticsearch/log #elasticsearch日志存储目录
             data: ./elasticsearch/data #elasticsearch数据存储目录
    thymeleaf:
-     cache: false
+      cache: false
 

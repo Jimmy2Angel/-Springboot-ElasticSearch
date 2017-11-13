@@ -7,7 +7,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Created by lollipop on 17/11/2
+ * @author: lollipop
+ * @date: 17/11/2
  */
 @Document(indexName="elasticsearch",type="article",indexStoreType="fs",shards=5,replicas=1,refreshInterval="-1")
 public class Article implements Serializable {
@@ -24,9 +25,9 @@ public class Article implements Serializable {
     /**点击率*/
     private Long clickCount;
     /**作者*/
-    private Author author;
+    private String author;
     /**所属教程*/
-    private Tutorial tutorial;
+    private String tutorial;
 
     public Long getId() {
         return id;
@@ -76,19 +77,19 @@ public class Article implements Serializable {
         this.clickCount = clickCount;
     }
 
-    public Author getAuthor() {
+    public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(Author author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
-    public Tutorial getTutorial() {
+    public String getTutorial() {
         return tutorial;
     }
 
-    public void setTutorial(Tutorial tutorial) {
+    public void setTutorial(String tutorial) {
         this.tutorial = tutorial;
     }
 
@@ -101,8 +102,8 @@ public class Article implements Serializable {
                 ", content='" + content + '\'' +
                 ", postTime=" + postTime +
                 ", clickCount=" + clickCount +
-                ", author=" + author +
-                ", tutorial=" + tutorial +
+                ", author='" + author + '\'' +
+                ", tutorial='" + tutorial + '\'' +
                 '}';
     }
 }
