@@ -2,6 +2,7 @@ package cc.fedtech.elasticsearch.entity;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -15,14 +16,18 @@ public class Article implements Serializable {
     @Id
     private Long id;
     /**标题*/
+    @Field
     private String title;
     /**摘要*/
+    @Field
     private String abstracts;
     /**内容*/
+    @Field
     private String content;
     /**发表时间*/
     private Date postTime;
     /**点击率*/
+    @Field
     private Long clickCount;
     /**作者*/
     private String author;

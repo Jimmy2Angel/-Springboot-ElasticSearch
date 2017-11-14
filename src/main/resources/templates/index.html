@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.springframework.org/schema/mvc">
 <head>
     <meta charset="UTF-8"/>
-    <title>thymeleaf learning</title>
+    <title>ElasticSearch Demo</title>
     <link rel="stylesheet" th:href="@{/layui/css/layui.css}"/>
 </head>
 <body>
@@ -45,11 +45,12 @@
                 , groups: 3 //连续显示分页数
                 , jump: function (obj, first) {
                     if (!first) {
+                        $("#articleList").html("");
                         putData(obj.curr);
                     }
                 }
             });
-            var html='',title='',abstracts='';
+            var html='',title='',msg='',abstracts='';
             $.each(data, function (n, value) {
                 title = '<a href="/es/article/'+value.id+'"><h3 style="display: block;\n' +
                     '    font-size: 1.17em;\n' +
@@ -58,11 +59,12 @@
                     '    -webkit-margin-start: 0px;\n' +
                     '    -webkit-margin-end: 0px;\n' +
                     '    font-weight: bold;">' + value.title + '</h3></a>';
+                msg = ''
                 abstracts = '<div style="line-height: 1.4;\n' +
                     '    word-wrap: break-word;"><span>'+value.abstracts+'</span></div>';
                 html+=(title+abstracts);
             });
-            $("#articleList").append(html);
+            $("#articleList").append(html===''?'<span>未查询到相关文章</span>':html);
         });
     };
 

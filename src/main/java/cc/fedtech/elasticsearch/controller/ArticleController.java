@@ -27,7 +27,7 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    @GetMapping("")
+    @GetMapping(value = {"","index"})
     public String index (Model model) {
         Iterable<Article> articles =  articleRepository.findAll();
         model.addAttribute("articles", articles);
@@ -56,13 +56,12 @@ public class ArticleController {
     }
 
     @GetMapping("{id}")
-    @ResponseBody
-    public String findById(@PathVariable Long id) {
-        Article searchResult = articleRepository.findOne(id);;
+    public String findById(@PathVariable Long id, Model model) {
+        Article searchResult = articleService.findOne(id);
         if (searchResult != null) {
-            return searchResult.toString();
+            model.addAttribute("article", searchResult);
         }
-        return "No related articles found";
+        return "article_detail";
     }
 
     @GetMapping("findAll")

@@ -3,8 +3,6 @@ package cc.fedtech.elasticsearch.service;
 import cc.fedtech.elasticsearch.data.PageResponse;
 import cc.fedtech.elasticsearch.entity.Article;
 
-import java.util.List;
-
 /**
  * @author: lollipop
  * @date: 17/11/13
@@ -42,4 +40,11 @@ public interface ArticleService {
      * 删除全部文章
      */
     void deleteAll();
+
+    /**
+     * 根据id获取一篇文章, 点击量加1
+     * @param id
+     * @return
+     */
+    Article findOne(Long id);
 }

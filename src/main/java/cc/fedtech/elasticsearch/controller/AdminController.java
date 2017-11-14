@@ -19,7 +19,7 @@ public class AdminController {
     @Autowired
     private ArticleService articleService;
 
-    @GetMapping("index")
+    @GetMapping(value = {"", "index"})
     public String index() {
         return "admin/index";
     }
