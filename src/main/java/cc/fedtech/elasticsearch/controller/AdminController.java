@@ -6,6 +6,7 @@ import cc.fedtech.elasticsearch.entity.Article;
 import cc.fedtech.elasticsearch.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -32,7 +33,10 @@ public class AdminController {
     }
 
     @GetMapping("add")
-    public String add() {
+    public String add(Long id, Model model) {
+        if (id != null) {
+            model.addAttribute("article", articleService.getById(id));
+        }
         return "admin/article_add";
     }
 
@@ -40,10 +44,23 @@ public class AdminController {
     @ResponseBody
     public JsonResult add(Article article) {
         JsonResult jsonResult = new JsonResult();
+        System.out.println("add");
         if(articleService.addArticle(article)) {
             jsonResult.markSuccess("新增成功", null);
         } else {
             jsonResult.markError("新增失败");
+        }
+        return jsonResult;
+    }
+
+    @PostMapping("edit")
+    @ResponseBody
+    public JsonResult edit(Article article) {
+        JsonResult jsonResult = new JsonResult();
+        if(articleService.updateArticle(article)) {
+            jsonResult.markSuccess("修改成功", null);
+        } else {
+            jsonResult.markError("修改失败");
         }
         return jsonResult;
     }

@@ -47,4 +47,18 @@ public interface ArticleService {
      * @return
      */
     Article findOne(Long id);
+
+    /**
+     * 根据id获取一篇文章, 点击量不变
+     * @param id
+     * @return
+     */
+    Article getById(Long id);
+
+    /**
+     * 后台修改文章
+     * @param article
+     * @return
+     */
+    boolean updateArticle(Article article);
 }

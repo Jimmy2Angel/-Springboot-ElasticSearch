@@ -8,6 +8,7 @@
 <body>
 <div style="text-align: left;margin:0 auto;width: 1000px; ">
     <input id="search" style="margin-top: 10px;height: 42px; width: 664px; font-size: 18px" placeholder="请输入文章标题进行检索"/>
+    &nbsp;&nbsp;找到约&nbsp;<span id="resultNum"></span>&nbsp;条结果&nbsp;&nbsp;(耗时：<span id="usedTime"></span>)
     <div id="articleList">
 
     </div>
@@ -31,7 +32,9 @@
             searchContent: searchContent,
             pageNum: pageNum //向服务端传的参数
         }, function (res) {
-            var data = res.data;
+            var data = res[0].data;
+            $("#resultNum").text(data.length);
+            $("#usedTime").text(res[1]+" ms");
             console.log(data);
             initPageNum = res.pageNum;
             // var myObject = JSON.parse(data);

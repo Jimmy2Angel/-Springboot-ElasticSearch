@@ -11,7 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author: lollipop
@@ -36,10 +38,16 @@ public class ArticleController {
 
     @GetMapping("getByPage")
     @ResponseBody
-    public PageResponse<Article> getByPage(@RequestParam(defaultValue = "0") Integer pageNum,
-                                           @RequestParam(defaultValue = "10") Integer pageSize,
-                                            String searchContent) {
-        return articleService.searchArticle(pageNum==0?pageNum:pageNum-1, pageSize, searchContent);
+    public List<Object> getByPage(@RequestParam(defaultValue = "0") Integer pageNum,
+                                  @RequestParam(defaultValue = "10") Integer pageSize,
+                                  String searchContent) {
+        List<Object> list = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
+        PageResponse<Article> pageResponse = articleService.searchArticle(pageNum==0?pageNum:pageNum-1, pageSize, searchContent);
+        long endTime = System.currentTimeMillis();
+        list.add(pageResponse);
+        list.add(endTime-startTime);
+        return list;
     }
 
     @GetMapping("query/{keyWords}")

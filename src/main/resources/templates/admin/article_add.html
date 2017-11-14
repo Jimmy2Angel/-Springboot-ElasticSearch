@@ -7,28 +7,29 @@
 </head>
 <body>
 <form class="layui-form" action="" method="post">
+    <input th:if="${article != null}" name="id" th:value="${article.id}" type="hidden"/>
     <div class="layui-form-item">
         <label class="layui-form-label">作者</label>
         <div class="layui-input-block">
-            <input type="text" name="author" required="required" lay-verify="author" placeholder="请输入作者" autocomplete="off" class="layui-input"/>
+            <input type="text" name="author" th:value="${article==null?'':article.author}" required="required" lay-verify="author" placeholder="请输入作者" autocomplete="off" class="layui-input"/>
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">标题</label>
         <div class="layui-input-block">
-            <input type="text" name="title" required="required" lay-verify="title" placeholder="请输入文章标题" autocomplete="off" class="layui-input"/>
+            <input type="text" name="title" th:value="${article==null?'':article.title}" required="required" lay-verify="title" placeholder="请输入文章标题" autocomplete="off" class="layui-input"/>
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">摘要</label>
         <div class="layui-input-block">
-            <textarea name="abstracts" required="required" lay-verify="abstracts" placeholder="请输入文章摘要" class="layui-textarea"></textarea>
+            <textarea name="abstracts" th:text="${article==null?'':article.abstracts}" required="required" lay-verify="abstracts" placeholder="请输入文章摘要" class="layui-textarea"></textarea>
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">内容</label>
         <div class="layui-input-block">
-            <textarea name="content" required="required" lay-verify="content" placeholder="请输入文章内容" class="layui-textarea"></textarea>
+            <textarea name="content" th:text="${article==null?'':article.content}" required="required" lay-verify="content" placeholder="请输入文章内容" class="layui-textarea"></textarea>
         </div>
     </div>
     <div class="layui-form-item">
@@ -39,13 +40,22 @@
     </div>
 </form>
 <script type="text/javascript" th:src="@{/layui/layui.js}"></script>
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
     layui.use(['form','layer'], function(){
         var form = layui.form, layer = layui.layer, $ = layui.$;
+        /*<![CDATA[*/
+        var article = [[${article}]];
+        /*]]>*/
         //监听保存提交
         form.on('submit(save)', function(data){
+            var url;
+            if (article === null) {
+                url = '/es/a/article/add';
+            } else {
+                url = '/es/a/article/edit'
+            }
             $.ajax({
-                url:'/es/a/article/add',
+                url:url,
                 data:data.field,
                 type:'post',
                 dataType:'json',

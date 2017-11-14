@@ -130,4 +130,25 @@ public class ArticleServiceImpl implements ArticleService{
         }
         return article;
     }
+
+    @Override
+    public Article getById(Long id) {
+        return articleRepository.findOne(id);
+    }
+
+    @Override
+    public boolean updateArticle(Article article) {
+        Article selectArticle = articleRepository.findOne(article.getId());
+        selectArticle.setAuthor(article.getAuthor());
+        selectArticle.setAbstracts(article.getAbstracts());
+        selectArticle.setContent(article.getContent());
+        selectArticle.setTitle(article.getTitle());
+        try {
+            articleRepository.save(selectArticle);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 }

@@ -46,7 +46,7 @@
             var layEvent = obj.event; //获得 lay-event 对应的值
             var tr = obj.tr; //获得当前行 tr 的DOM对象
             if (layEvent === 'edit') {
-                alert("edit");
+                editArticle(data.id)
             } else if (layEvent === 'del') {
                 deleteArticle(data.id);
             }
@@ -106,6 +106,19 @@
         });
     }
 
+    function editArticle(id) {
+        layer.open({
+            type: 2,
+            title: '修改文章',
+            closeBtn: '2',
+            area: ['50%', '80%'],
+            content: '/es/a/article/add?id='+id,
+            end:function(){
+                putData(1);
+            }
+        });
+    }
+
     function deleteArticle(id) {
         layer.confirm("您确定删除该文章吗？", function (index) {
             $.ajax({
@@ -128,7 +141,7 @@
 </script>
 <script type="text/html" id="barDemo">
     {{#  if(d.coluDefault != 1 ){ }}
-    <!--<a class="layui-btn layui-btn-mini  layui-btn-normal" lay-event="edit">编辑</a>-->
+    <a class="layui-btn layui-btn-mini  layui-btn-normal" lay-event="edit">编辑</a>
     <a class="layui-btn layui-btn-danger layui-btn-mini  layui-btn-danger" lay-event="del">删除</a>
     {{#  } }}
 
