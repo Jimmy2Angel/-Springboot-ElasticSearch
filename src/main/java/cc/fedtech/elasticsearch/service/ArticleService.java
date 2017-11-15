@@ -3,6 +3,8 @@ package cc.fedtech.elasticsearch.service;
 import cc.fedtech.elasticsearch.data.PageResponse;
 import cc.fedtech.elasticsearch.entity.Article;
 
+import java.util.List;
+
 /**
  * @author: lollipop
  * @date: 17/11/13
@@ -17,6 +19,15 @@ public interface ArticleService {
      * @return
      */
     PageResponse<Article> searchArticle(Integer pageNum, Integer pageSize, String searchContent);
+
+    /**
+     * 前台分页获取，关键词高亮
+     * @param pageNum
+     * @param pageSize
+     * @param searchContent
+     * @return
+     */
+    PageResponse<Article>  searchArticleWithHighlight(Integer pageNum, Integer pageSize, String searchContent);
 
     /**
      * 新增文章
@@ -61,4 +72,12 @@ public interface ArticleService {
      * @return
      */
     boolean updateArticle(Article article);
+
+    Iterable<Article> findAll();
+
+    Iterable<Article> findByTitleOrContent(String title, String content);
+
+    void delete(Long id);
+
+    Iterable<Article> search(String keyWords);
 }

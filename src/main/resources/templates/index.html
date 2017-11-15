@@ -33,17 +33,17 @@
             pageNum: pageNum //向服务端传的参数
         }, function (res) {
             var data = res[0].data;
-            $("#resultNum").text(data.length);
+            $("#resultNum").text(res[0].total);
             $("#usedTime").text(res[1]+" ms");
             console.log(data);
-            initPageNum = res.pageNum;
+            initPageNum = res[0].pageNum;
             // var myObject = JSON.parse(data);
             //自定义样式
             laypage.render({
                 elem: 'page'
-                , count: res.total
+                , count: res[0].total
                 , theme: '#1E9FFF'
-                , curr: res.pageNum
+                , curr: res[0].pageNum
                 , layout: [ 'prev', 'page', 'next', 'skip']
                 , groups: 3 //连续显示分页数
                 , jump: function (obj, first) {

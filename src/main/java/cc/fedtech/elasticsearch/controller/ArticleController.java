@@ -1,12 +1,9 @@
 package cc.fedtech.elasticsearch.controller;
 
-import cc.fedtech.elasticsearch.dao.ArticleRepository;
 import cc.fedtech.elasticsearch.data.PageResponse;
 import cc.fedtech.elasticsearch.entity.Article;
 import cc.fedtech.elasticsearch.service.ArticleService;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,14 +21,11 @@ import java.util.List;
 public class ArticleController {
 
     @Autowired
-    private ArticleRepository articleRepository;
-
-    @Autowired
     private ArticleService articleService;
 
     @GetMapping(value = {"","index"})
     public String index (Model model) {
-        Iterable<Article> articles =  articleRepository.findAll();
+        Iterable<Article> articles =  articleService.findAll();
         model.addAttribute("articles", articles);
         return "index";
     }
@@ -43,7 +37,7 @@ public class ArticleController {
                                   String searchContent) {
         List<Object> list = new ArrayList<>();
         long startTime = System.currentTimeMillis();
-        PageResponse<Article> pageResponse = articleService.searchArticle(pageNum==0?pageNum:pageNum-1, pageSize, searchContent);
+        PageResponse<Article> pageResponse = articleService.searchArticleWithHighlight(pageNum==0?pageNum:pageNum-1, pageSize, searchContent);
         long endTime = System.currentTimeMillis();
         list.add(pageResponse);
         list.add(endTime-startTime);
@@ -54,8 +48,7 @@ public class ArticleController {
     @ResponseBody
     public String testSearch(@PathVariable String keyWords) {
         StringBuilder sb = new StringBuilder();
-        QueryStringQueryBuilder builder = new QueryStringQueryBuilder(keyWords);
-        Iterable<Article> searchResult = articleRepository.search(builder);
+        Iterable<Article> searchResult = articleService.search(keyWords);
         Iterator<Article> iterator = searchResult.iterator();
         while (iterator.hasNext()) {
             sb.append(iterator.next().toString()+"\n ");
@@ -76,7 +69,7 @@ public class ArticleController {
     @ResponseBody
     public String findAll() {
         StringBuilder sb = new StringBuilder();
-        Iterable<Article> searchResult = articleRepository.findAll();
+        Iterable<Article> searchResult = articleService.findAll();
         Iterator<Article> iterator = searchResult.iterator();
         while (iterator.hasNext()) {
             sb.append(iterator.next().toString()+"\n ");
@@ -88,7 +81,7 @@ public class ArticleController {
     @ResponseBody
     public String findByTitleOrContent(@PathVariable String searchMsg) {
         StringBuilder sb = new StringBuilder();
-        Iterable<Article> searchResult = articleRepository.findByTitleOrContent(searchMsg, searchMsg);
+        Iterable<Article> searchResult = articleService.findByTitleOrContent(searchMsg, searchMsg);
         Iterator<Article> iterator = searchResult.iterator();
         while (iterator.hasNext()) {
             sb.append(iterator.next().toString()+"\n ");
@@ -99,7 +92,7 @@ public class ArticleController {
     @GetMapping("delete/{id}")
     @ResponseBody
     public void deleteById(@PathVariable Long id) {
-        articleRepository.delete(id);
+        articleService.delete(id);
     }
 
 }
