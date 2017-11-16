@@ -1,5 +1,6 @@
 package cc.fedtech.elasticsearch;
 
+import cc.fedtech.elasticsearch.dao.ArticleRepository;
 import cc.fedtech.elasticsearch.entity.Article;
 import com.alibaba.fastjson.JSONObject;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -27,6 +28,9 @@ public class ArticleTest extends ElasticsearchApplicationTests{
 
     @Autowired
     ElasticsearchTemplate elasticsearchTemplate;
+
+    @Autowired
+    ArticleRepository articleRepository;
 
     @Test
     public void testGetIndex() {

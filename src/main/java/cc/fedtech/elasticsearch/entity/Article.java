@@ -1,8 +1,10 @@
 package cc.fedtech.elasticsearch.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -11,23 +13,23 @@ import java.util.Date;
  * @author: lollipop
  * @date: 17/11/2
  */
-@Document(indexName="elasticsearch",type="article",indexStoreType="fs",shards=5,replicas=1,refreshInterval="-1")
+@Document(indexName="elastic_v1",type="article",indexStoreType="fs",shards=5,replicas=1,refreshInterval="-1")
 public class Article implements Serializable {
     @Id
     private Long id;
     /**标题*/
-    @Field
+    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.String)
     private String title;
     /**摘要*/
-    @Field
+    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.String)
     private String abstracts;
     /**内容*/
-    @Field
+    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.String)
     private String content;
     /**发表时间*/
+    @JsonFormat (shape = JsonFormat.Shape.STRING, pattern ="yyyy-MM-dd HH:mm:ss")
     private Date postTime;
     /**点击率*/
-    @Field
     private Long clickCount;
     /**作者*/
     private String author;

@@ -99,7 +99,7 @@ public class ArticleServiceImpl implements ArticleService{
             return findAllByPaging(pageNum, pageSize);
         } else {
             try {
-                // 创建查询索引,参数productindex表示要查询的索引库为productindex
+                // 创建查询索引
                 SearchRequestBuilder searchRequestBuilder = elasticsearchTemplate.getClient()
                         .prepareSearch(INDEX_NAME);
 
@@ -118,7 +118,7 @@ public class ArticleServiceImpl implements ArticleService{
                 queryBuilder.field("title").field("abstracts");
 
                 //分词器
-///                queryBuilder.analyzer("ik_smart");
+                queryBuilder.analyzer("ik_smart");
                 searchRequestBuilder.setQuery(queryBuilder);
 
                 // 分页应用

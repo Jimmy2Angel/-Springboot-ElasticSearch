@@ -53,7 +53,7 @@ public class ArticleController {
         while (iterator.hasNext()) {
             sb.append(iterator.next().toString()+"\n ");
         }
-        return sb.toString().length()==0?"No related articles found":sb.toString();
+        return sb.toString().length()==0?"No related articles found!!":sb.toString();
     }
 
     @GetMapping("{id}")

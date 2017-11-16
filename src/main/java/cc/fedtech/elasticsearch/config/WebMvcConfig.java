@@ -1,9 +1,5 @@
 package cc.fedtech.elasticsearch.config;
 
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter4;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -13,9 +9,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -23,9 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,6 +58,5 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         objectMapper.registerModule(simpleModule);
         jackson2HttpMessageConverter.setObjectMapper(objectMapper);
         converters.add(jackson2HttpMessageConverter);
-
     }
 }
