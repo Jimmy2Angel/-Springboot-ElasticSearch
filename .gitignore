@@ -1,4 +1,5 @@
 /.idea
+/elasticsearch
 target/
 *.iml
 mvnw
