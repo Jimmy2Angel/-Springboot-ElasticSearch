@@ -1,7 +1,8 @@
 package cc.fedtech.elasticsearch.data;
 
 /**
- * Created by Gong on 2016/4/7.
+ * @author: lollipop
+ * @date: 17/11/10
  */
 public class JsonResult {
 

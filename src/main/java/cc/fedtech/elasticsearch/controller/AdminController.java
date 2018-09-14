@@ -28,8 +28,8 @@ public class AdminController {
     @GetMapping("getByPage")
     @ResponseBody
     public PageResponse<Article> getByPage(@RequestParam(defaultValue = "0") Integer pageNum,
-                                   @RequestParam(defaultValue = "10") Integer pageSize) {
-        return articleService.searchArticle(pageNum==0?pageNum:pageNum-1, pageSize, null);
+                                           @RequestParam(defaultValue = "10") Integer pageSize) {
+        return articleService.searchArticle(pageNum, pageSize, null);
     }
 
     @GetMapping("add")
@@ -45,7 +45,7 @@ public class AdminController {
     public JsonResult add(Article article) {
         JsonResult jsonResult = new JsonResult();
         System.out.println("add");
-        if(articleService.addArticle(article)) {
+        if (articleService.addArticle(article)) {
             jsonResult.markSuccess("新增成功", null);
         } else {
             jsonResult.markError("新增失败");
@@ -57,7 +57,7 @@ public class AdminController {
     @ResponseBody
     public JsonResult edit(Article article) {
         JsonResult jsonResult = new JsonResult();
-        if(articleService.updateArticle(article)) {
+        if (articleService.updateArticle(article)) {
             jsonResult.markSuccess("修改成功", null);
         } else {
             jsonResult.markError("修改失败");

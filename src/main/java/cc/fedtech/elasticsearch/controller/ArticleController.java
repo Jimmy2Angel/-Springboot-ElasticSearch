@@ -23,9 +23,9 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    @GetMapping(value = {"","index"})
-    public String index (Model model) {
-        Iterable<Article> articles =  articleService.findAll();
+    @GetMapping(value = {"", "index"})
+    public String index(Model model) {
+        Iterable<Article> articles = articleService.findAll();
         model.addAttribute("articles", articles);
         return "index";
     }
@@ -37,10 +37,10 @@ public class ArticleController {
                                   String searchContent) {
         List<Object> list = new ArrayList<>();
         long startTime = System.currentTimeMillis();
-        PageResponse<Article> pageResponse = articleService.searchArticleWithHighlight(pageNum==0?pageNum:pageNum-1, pageSize, searchContent);
+        PageResponse<Article> pageResponse = articleService.searchArticleWithHighlight(pageNum, pageSize, searchContent);
         long endTime = System.currentTimeMillis();
         list.add(pageResponse);
-        list.add(endTime-startTime);
+        list.add(endTime - startTime);
         return list;
     }
 
@@ -51,9 +51,9 @@ public class ArticleController {
         Iterable<Article> searchResult = articleService.search(keyWords);
         Iterator<Article> iterator = searchResult.iterator();
         while (iterator.hasNext()) {
-            sb.append(iterator.next().toString()+"\n ");
+            sb.append(iterator.next().toString() + "\n ");
         }
-        return sb.toString().length()==0?"No related articles found!!":sb.toString();
+        return sb.toString().length() == 0 ? "No related articles found!!" : sb.toString();
     }
 
     @GetMapping("{id}")
@@ -72,9 +72,9 @@ public class ArticleController {
         Iterable<Article> searchResult = articleService.findAll();
         Iterator<Article> iterator = searchResult.iterator();
         while (iterator.hasNext()) {
-            sb.append(iterator.next().toString()+"\n ");
+            sb.append(iterator.next().toString() + "\n ");
         }
-        return sb.toString().length()==0?"No related articles found":sb.toString();
+        return sb.toString().length() == 0 ? "No related articles found" : sb.toString();
     }
 
     @GetMapping("findByTitleOrContent/{searchMsg}")
@@ -84,9 +84,9 @@ public class ArticleController {
         Iterable<Article> searchResult = articleService.findByTitleOrContent(searchMsg, searchMsg);
         Iterator<Article> iterator = searchResult.iterator();
         while (iterator.hasNext()) {
-            sb.append(iterator.next().toString()+"\n ");
+            sb.append(iterator.next().toString() + "\n ");
         }
-        return sb.toString().length()==0?"No related articles found":sb.toString();
+        return sb.toString().length() == 0 ? "No related articles found" : sb.toString();
     }
 
     @GetMapping("delete/{id}")

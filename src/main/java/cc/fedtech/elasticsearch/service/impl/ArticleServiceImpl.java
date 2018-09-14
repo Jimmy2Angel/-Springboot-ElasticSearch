@@ -35,11 +35,11 @@ import java.util.*;
  * @date: 17/11/13
  */
 @Service
-public class ArticleServiceImpl implements ArticleService{
+public class ArticleServiceImpl implements ArticleService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArticleServiceImpl.class);
 
-    private static final String INDEX_NAME = "elasticsearch";
+    private static final String INDEX_NAME = "elastic_v1";
     private static final String TYPE_NAME = "article";
 
     private static final String PRE_TAG = "<span style=\"color:red\">";
@@ -53,8 +53,9 @@ public class ArticleServiceImpl implements ArticleService{
 
     @Override
     public PageResponse<Article> searchArticle(Integer pageNum, Integer pageSize, String searchContent) {
-        List<Article> articleList = null;
+        List<Article> articleList;
         // 分页参数
+        pageNum = pageNum == 0 ? pageNum : pageNum - 1;
         Pageable pageable = new PageRequest(pageNum, pageSize);
         int total = 0;
         if ("".equals(searchContent) || searchContent == null) {
@@ -79,14 +80,14 @@ public class ArticleServiceImpl implements ArticleService{
 
             Page<Article> page = articleRepository.search(searchQuery);
             articleList = page.getContent();
-            total = (int) elasticsearchTemplate.count(searchQuery);;
+            total = (int) elasticsearchTemplate.count(searchQuery);
             PageResponse<Article> pageResponse = new PageResponse<>();
             pageResponse.setRecordsFiltered(total);
             pageResponse.setRecordsTotal(total);
-            pageResponse.setPageNum(pageNum+1);
+            pageResponse.setPageNum(pageNum + 1);
             pageResponse.setPageSize(pageSize);
             pageResponse.setTotal(total);
-            pageResponse.setData(articleList.size()==0?null:articleList);
+            pageResponse.setData(articleList.size() == 0 ? null : articleList);
             return pageResponse;
         }
     }
@@ -94,7 +95,8 @@ public class ArticleServiceImpl implements ArticleService{
     @Override
     public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer pageSize, String searchContent) {
         PageResponse<Article> pageResponse = new PageResponse<>();
-        List<Article> articleList= new ArrayList<Article>();
+        List<Article> articleList = new ArrayList<>();
+        pageNum = pageNum == 0 ? pageNum : pageNum - 1;
         if ("".equals(searchContent) || searchContent == null) {
             return findAllByPaging(pageNum, pageSize);
         } else {
@@ -122,7 +124,7 @@ public class ArticleServiceImpl implements ArticleService{
                 searchRequestBuilder.setQuery(queryBuilder);
 
                 // 分页应用
-                searchRequestBuilder.setFrom(pageNum*pageSize+1).setSize(pageSize);
+                searchRequestBuilder.setFrom(pageNum * pageSize + 1).setSize(pageSize);
 
                 // 设置是否按查询匹配度排序
                 searchRequestBuilder.setExplain(true);
@@ -149,7 +151,7 @@ public class ArticleServiceImpl implements ArticleService{
                     Map<String, HighlightField> result = hit.highlightFields();
                     // 从设定的高亮域中取得指定域
                     HighlightField titleField = result.get("title");
-                    if (titleField !=null) {
+                    if (titleField != null) {
                         // 取得定义的高亮标签
                         Text[] titleTexts = titleField.fragments();
                         // 为title串值增加自定义的高亮标签
@@ -161,7 +163,7 @@ public class ArticleServiceImpl implements ArticleService{
                     }
                     // 从设定的高亮域中取得指定域
                     HighlightField contentField = result.get("abstracts");
-                    if (contentField !=null) {
+                    if (contentField != null) {
                         // 取得定义的高亮标签
                         Text[] contentTexts = contentField.fragments();
                         // 为title串值增加自定义的高亮标签
@@ -183,10 +185,10 @@ public class ArticleServiceImpl implements ArticleService{
             int total = articleList.size();
             pageResponse.setRecordsFiltered(total);
             pageResponse.setRecordsTotal(total);
-            pageResponse.setPageNum(pageNum+1);
+            pageResponse.setPageNum(pageNum + 1);
             pageResponse.setPageSize(pageSize);
             pageResponse.setTotal(total);
-            pageResponse.setData(articleList.size()==0?null:articleList);
+            pageResponse.setData(articleList.size() == 0 ? null : articleList);
             return pageResponse;
         }
     }
@@ -197,10 +199,10 @@ public class ArticleServiceImpl implements ArticleService{
         PageResponse<Article> pageResponse = new PageResponse<>();
         pageResponse.setRecordsFiltered(total);
         pageResponse.setRecordsTotal(total);
-        pageResponse.setPageNum(pageNum+1);
+        pageResponse.setPageNum(pageNum + 1);
         pageResponse.setPageSize(pageSize);
         pageResponse.setTotal(total);
-        pageResponse.setData(articleList.size()==0?null:articleList);
+        pageResponse.setData(articleList.size() == 0 ? null : articleList);
         return pageResponse;
     }
 
@@ -256,9 +258,9 @@ public class ArticleServiceImpl implements ArticleService{
 
     @Override
     public Article findOne(Long id) {
-        Article article =  articleRepository.findOne(id);
+        Article article = articleRepository.findOne(id);
         if (article != null) {
-            article.setClickCount(article.getClickCount()+1);
+            article.setClickCount(article.getClickCount() + 1);
             articleRepository.save(article);
         }
         return article;

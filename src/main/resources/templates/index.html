@@ -21,7 +21,7 @@
         $ = layui.jquery, laytpl = layui.laytpl, form = layui.form, layer = layui.layer, table = layui.table, laypage = layui.laypage, element = layui.element;
         putData(1, null);
         $('#search').bind('keypress',function(event){
-            if(event.keyCode == "13") {
+            if(event.keyCode === 13) {
                 $("#articleList").html("");
                 putData(1, $("#search").val());
             }
@@ -35,7 +35,6 @@
             var data = res[0].data;
             $("#resultNum").text(res[0].total);
             $("#usedTime").text(res[1]+" ms");
-            console.log(data);
             initPageNum = res[0].pageNum;
             // var myObject = JSON.parse(data);
             //自定义样式
