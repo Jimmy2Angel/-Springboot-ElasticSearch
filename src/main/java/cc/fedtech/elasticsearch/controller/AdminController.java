@@ -20,11 +20,21 @@ public class AdminController {
     @Autowired
     private ArticleService articleService;
 
+    /**
+     * 跳转后台首页
+     * @return
+     */
     @GetMapping(value = {"", "index"})
     public String index() {
         return "admin/index";
     }
 
+    /**
+     * 分页获取文章列表数据
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     @GetMapping("getByPage")
     @ResponseBody
     public PageResponse<Article> getByPage(@RequestParam(defaultValue = "0") Integer pageNum,
@@ -32,6 +42,12 @@ public class AdminController {
         return articleService.searchArticle(pageNum, pageSize, null);
     }
 
+    /**
+     * 跳转文章新增／编辑页面
+     * @param id
+     * @param model
+     * @return
+     */
     @GetMapping("add")
     public String add(Long id, Model model) {
         if (id != null) {
@@ -40,11 +56,15 @@ public class AdminController {
         return "admin/article_add";
     }
 
+    /**
+     * 新增文章
+     * @param article
+     * @return
+     */
     @PostMapping("add")
     @ResponseBody
     public JsonResult add(Article article) {
         JsonResult jsonResult = new JsonResult();
-        System.out.println("add");
         if (articleService.addArticle(article)) {
             jsonResult.markSuccess("新增成功", null);
         } else {
@@ -53,6 +73,11 @@ public class AdminController {
         return jsonResult;
     }
 
+    /**
+     * 编辑文章
+     * @param article
+     * @return
+     */
     @PostMapping("edit")
     @ResponseBody
     public JsonResult edit(Article article) {
@@ -65,6 +90,11 @@ public class AdminController {
         return jsonResult;
     }
 
+    /**
+     * 删除文章
+     * @param id
+     * @return
+     */
     @PostMapping("delete")
     @ResponseBody
     public boolean delete(Long id) {
@@ -72,17 +102,4 @@ public class AdminController {
         return true;
     }
 
-    @GetMapping("deleteAll")
-    @ResponseBody
-    public String deleteAll() {
-        articleService.deleteAll();
-        return "all article has deleted!";
-    }
-
-    @GetMapping("deleteIndex")
-    @ResponseBody
-    public String deleteIndex() {
-        articleService.deleteIndex();
-        return "the elasticsearch index has deleted!";
-    }
 }

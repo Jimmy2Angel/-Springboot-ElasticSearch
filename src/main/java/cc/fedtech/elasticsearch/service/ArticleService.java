@@ -37,20 +37,10 @@ public interface ArticleService {
     boolean addArticle(Article article);
 
     /**
-     * 删除索引
-     */
-    void deleteIndex();
-
-    /**
-     * 删除文章
+     * 后台删除文章
      * @param id
      */
     void deleteById(Long id);
-
-    /**
-     * 删除全部文章
-     */
-    void deleteAll();
 
     /**
      * 根据id获取一篇文章, 点击量加1
@@ -73,11 +63,4 @@ public interface ArticleService {
      */
     boolean updateArticle(Article article);
 
-    Iterable<Article> findAll();
-
-    Iterable<Article> findByTitleOrContent(String title, String content);
-
-    void delete(Long id);
-
-    Iterable<Article> search(String keyWords);
 }

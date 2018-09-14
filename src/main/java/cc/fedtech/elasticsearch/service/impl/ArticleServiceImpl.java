@@ -193,7 +193,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
-    public PageResponse<Article> findAllByPaging(Integer pageNum, Integer pageSize) {
+    private PageResponse<Article> findAllByPaging(Integer pageNum, Integer pageSize) {
         List<Article> articleList = articleRepository.findAll(new PageRequest(pageNum, pageSize)).getContent();
         int total = (int) articleRepository.count();
         PageResponse<Article> pageResponse = new PageResponse<>();
@@ -204,27 +204,6 @@ public class ArticleServiceImpl implements ArticleService {
         pageResponse.setTotal(total);
         pageResponse.setData(articleList.size() == 0 ? null : articleList);
         return pageResponse;
-    }
-
-    @Override
-    public Iterable<Article> findAll() {
-        return articleRepository.findAll();
-    }
-
-    @Override
-    public Iterable<Article> findByTitleOrContent(String title, String content) {
-        return articleRepository.findByTitleOrContent(title, content);
-    }
-
-    @Override
-    public void delete(Long id) {
-        articleRepository.delete(id);
-    }
-
-    @Override
-    public Iterable<Article> search(String keyWords) {
-        QueryStringQueryBuilder builder = new QueryStringQueryBuilder(keyWords);
-        return articleRepository.search(builder);
     }
 
     @Override
@@ -242,18 +221,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public void deleteIndex() {
-        elasticsearchTemplate.deleteIndex(INDEX_NAME);
-    }
-
-    @Override
     public void deleteById(Long id) {
         articleRepository.delete(id);
-    }
-
-    @Override
-    public void deleteAll() {
-        articleRepository.deleteAll();
     }
 
     @Override

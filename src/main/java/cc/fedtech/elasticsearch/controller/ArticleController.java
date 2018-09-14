@@ -9,7 +9,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -23,13 +22,24 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
+    /**
+     * 跳转首页
+     *
+     * @return
+     */
     @GetMapping(value = {"", "index"})
-    public String index(Model model) {
-        Iterable<Article> articles = articleService.findAll();
-        model.addAttribute("articles", articles);
+    public String index() {
         return "index";
     }
 
+    /**
+     * 分页获取文章列表
+     *
+     * @param pageNum
+     * @param pageSize
+     * @param searchContent 检索关键词
+     * @return
+     */
     @GetMapping("getByPage")
     @ResponseBody
     public List<Object> getByPage(@RequestParam(defaultValue = "0") Integer pageNum,
@@ -44,18 +54,13 @@ public class ArticleController {
         return list;
     }
 
-    @GetMapping("query/{keyWords}")
-    @ResponseBody
-    public String testSearch(@PathVariable String keyWords) {
-        StringBuilder sb = new StringBuilder();
-        Iterable<Article> searchResult = articleService.search(keyWords);
-        Iterator<Article> iterator = searchResult.iterator();
-        while (iterator.hasNext()) {
-            sb.append(iterator.next().toString() + "\n ");
-        }
-        return sb.toString().length() == 0 ? "No related articles found!!" : sb.toString();
-    }
-
+    /**
+     * 根据id查看文章详情
+     *
+     * @param id
+     * @param model
+     * @return
+     */
     @GetMapping("{id}")
     public String findById(@PathVariable Long id, Model model) {
         Article searchResult = articleService.findOne(id);
@@ -63,36 +68,6 @@ public class ArticleController {
             model.addAttribute("article", searchResult);
         }
         return "article_detail";
-    }
-
-    @GetMapping("findAll")
-    @ResponseBody
-    public String findAll() {
-        StringBuilder sb = new StringBuilder();
-        Iterable<Article> searchResult = articleService.findAll();
-        Iterator<Article> iterator = searchResult.iterator();
-        while (iterator.hasNext()) {
-            sb.append(iterator.next().toString() + "\n ");
-        }
-        return sb.toString().length() == 0 ? "No related articles found" : sb.toString();
-    }
-
-    @GetMapping("findByTitleOrContent/{searchMsg}")
-    @ResponseBody
-    public String findByTitleOrContent(@PathVariable String searchMsg) {
-        StringBuilder sb = new StringBuilder();
-        Iterable<Article> searchResult = articleService.findByTitleOrContent(searchMsg, searchMsg);
-        Iterator<Article> iterator = searchResult.iterator();
-        while (iterator.hasNext()) {
-            sb.append(iterator.next().toString() + "\n ");
-        }
-        return sb.toString().length() == 0 ? "No related articles found" : sb.toString();
-    }
-
-    @GetMapping("delete/{id}")
-    @ResponseBody
-    public void deleteById(@PathVariable Long id) {
-        articleService.delete(id);
     }
 
 }
