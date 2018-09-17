@@ -63,4 +63,9 @@ public interface ArticleService {
      */
     boolean updateArticle(Article article);
 
+    /**
+     * 删除全部文章
+     */
+    void deleteAll();
+
 }

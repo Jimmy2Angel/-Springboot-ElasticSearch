@@ -35,6 +35,8 @@ public class Article implements Serializable {
     private String author;
     /**所属教程*/
     private String tutorial;
+    /**原文章地址*/
+    private String url;
 
     public Long getId() {
         return id;
@@ -100,6 +102,14 @@ public class Article implements Serializable {
         this.tutorial = tutorial;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
         return "Article{" +
@@ -111,6 +121,7 @@ public class Article implements Serializable {
                 ", clickCount=" + clickCount +
                 ", author='" + author + '\'' +
                 ", tutorial='" + tutorial + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
 }

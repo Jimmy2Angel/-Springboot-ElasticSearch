@@ -48,13 +48,13 @@
                 , jump: function (obj, first) {
                     if (!first) {
                         $("#articleList").html("");
-                        putData(obj.curr);
+                        putData(obj.curr, $("#search").val());
                     }
                 }
             });
             var html='',title='',msg='',abstracts='';
             $.each(data, function (n, value) {
-                title = '<a href="/es/article/'+value.id+'"><h3 style="display: block;\n' +
+                title = '<a href="'+value.url+'" target="_Blank"><h3 style="display: block;\n' +
                     '    font-size: 1.17em;\n' +
                     '    -webkit-margin-before: 1em;\n' +
                     '    -webkit-margin-after: 1em;\n' +

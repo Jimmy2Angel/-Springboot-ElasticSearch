@@ -4,6 +4,9 @@ import cc.fedtech.elasticsearch.data.JsonResult;
 import cc.fedtech.elasticsearch.data.PageResponse;
 import cc.fedtech.elasticsearch.entity.Article;
 import cc.fedtech.elasticsearch.service.ArticleService;
+import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -99,6 +102,66 @@ public class AdminController {
     @ResponseBody
     public boolean delete(Long id) {
         articleService.deleteById(id);
+        return true;
+    }
+
+    /**
+     * 删除全部文章
+     * @return
+     */
+    @PostMapping("deleteAll")
+    @ResponseBody
+    public boolean deleteAll() {
+        articleService.deleteAll();
+        return true;
+    }
+
+    /**
+     * 批量获取倔强上后端文章保存到 es
+     * @return
+     */
+    @GetMapping("batchSave")
+    @ResponseBody
+    public boolean batchSave() {
+        String url = "https://timeline-merger-ms.juejin.im/v1/get_entry_by_rank?src=web&limit=20&category=5562b419e4b00c57d9b94ae2";
+        if (!"".equals(lastRankIndex)) {
+            url = url + "&before=" + lastRankIndex;
+        }
+        return test(url);
+    }
+
+    private int index = 1;
+    private String lastRankIndex = "";
+
+    private boolean test (String url) {
+        String content = HttpUtil.get(url);
+        System.out.println(index++ + " : " + content);
+        JSONObject resultObject = JSONObject.parseObject(content);
+        JSONArray entryArray;
+        try {
+            entryArray = resultObject.getJSONObject("d").getJSONArray("entrylist");
+            assert entryArray != null;
+            for (int i = 0; i < entryArray.size(); i++) {
+                JSONObject jsonObject = entryArray.getJSONObject(i);
+                Article article = new Article();
+                article.setAuthor(jsonObject.getJSONObject("user").getString("username"));
+                article.setTitle(jsonObject.getString("title"));
+                article.setAbstracts(jsonObject.getString("summaryInfo"));
+                article.setContent(jsonObject.getString("content"));
+                article.setUrl(jsonObject.getString("originalUrl"));
+                articleService.addArticle(article);
+                lastRankIndex = jsonObject.getString("rankIndex");
+                if (index == 50000) {
+                    break;
+                }
+                if (i == entryArray.size() - 1) {
+                    test(url + "&before=" + lastRankIndex);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("lastRankIndex : " + lastRankIndex);
+            return false;
+        }
         return true;
     }
 

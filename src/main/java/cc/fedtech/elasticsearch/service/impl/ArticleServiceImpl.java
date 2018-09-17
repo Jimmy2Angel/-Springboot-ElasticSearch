@@ -96,6 +96,7 @@ public class ArticleServiceImpl implements ArticleService {
     public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer pageSize, String searchContent) {
         PageResponse<Article> pageResponse = new PageResponse<>();
         List<Article> articleList = new ArrayList<>();
+        int total = 0;
         pageNum = pageNum == 0 ? pageNum : pageNum - 1;
         if ("".equals(searchContent) || searchContent == null) {
             return findAllByPaging(pageNum, pageSize);
@@ -139,6 +140,7 @@ public class ArticleServiceImpl implements ArticleService {
                 // 获取搜索的文档结果
                 SearchHits searchHits = response.getHits();
                 SearchHit[] hits = searchHits.getHits();
+                total = (int) searchHits.getTotalHits();
                 // ObjectMapper mapper = new ObjectMapper();
                 for (int i = 0; i < hits.length; i++) {
                     SearchHit hit = hits[i];
@@ -182,7 +184,6 @@ public class ArticleServiceImpl implements ArticleService {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            int total = articleList.size();
             pageResponse.setRecordsFiltered(total);
             pageResponse.setRecordsTotal(total);
             pageResponse.setPageNum(pageNum + 1);
@@ -254,5 +255,10 @@ public class ArticleServiceImpl implements ArticleService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void deleteAll() {
+        articleRepository.deleteAll();
     }
 }
