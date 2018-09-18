@@ -175,8 +175,7 @@ public class AdminController {
      * 调用掘金接口，解析获取的文章集合，保存到 es
      */
     private void batchSaveToES() {
-        String url = GET_ARTICLE_URL;
-        url = "".equals(lastRankIndex) ? url : (GET_ARTICLE_URL + lastRankIndex);
+        String url = "".equals(lastRankIndex) ? GET_ARTICLE_URL : (GET_ARTICLE_URL + lastRankIndex);
         String content = HttpUtil.get(url);
         LOGGER.info(index + " : " + content);
         JSONObject resultObject = JSONObject.parseObject(content);
