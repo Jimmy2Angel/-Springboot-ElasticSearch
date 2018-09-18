@@ -66,7 +66,9 @@ private static final String POST_TAG = "</span>";
 
 public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer pageSize, String searchContent) {
         PageResponse<Article> pageResponse = new PageResponse<>();
-        List<Article> articleList= new ArrayList<Article>();
+        List<Article> articleList = new ArrayList<>();
+        int total = 0;
+        pageNum = pageNum == 0 ? pageNum : pageNum - 1;
         if ("".equals(searchContent) || searchContent == null) {
             return findAllByPaging(pageNum, pageSize);
         } else {
@@ -94,7 +96,7 @@ public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer
                 searchRequestBuilder.setQuery(queryBuilder);
 
                 // 分页应用
-                searchRequestBuilder.setFrom(pageNum*pageSize+1).setSize(pageSize);
+                searchRequestBuilder.setFrom(pageNum * pageSize + 1).setSize(pageSize);
 
                 // 设置是否按查询匹配度排序
                 searchRequestBuilder.setExplain(true);
@@ -109,6 +111,7 @@ public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer
                 // 获取搜索的文档结果
                 SearchHits searchHits = response.getHits();
                 SearchHit[] hits = searchHits.getHits();
+                total = (int) searchHits.getTotalHits();
                 // ObjectMapper mapper = new ObjectMapper();
                 for (int i = 0; i < hits.length; i++) {
                     SearchHit hit = hits[i];
@@ -121,7 +124,7 @@ public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer
                     Map<String, HighlightField> result = hit.highlightFields();
                     // 从设定的高亮域中取得指定域
                     HighlightField titleField = result.get("title");
-                    if (titleField !=null) {
+                    if (titleField != null) {
                         // 取得定义的高亮标签
                         Text[] titleTexts = titleField.fragments();
                         // 为title串值增加自定义的高亮标签
@@ -133,7 +136,7 @@ public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer
                     }
                     // 从设定的高亮域中取得指定域
                     HighlightField contentField = result.get("abstracts");
-                    if (contentField !=null) {
+                    if (contentField != null) {
                         // 取得定义的高亮标签
                         Text[] contentTexts = contentField.fragments();
                         // 为title串值增加自定义的高亮标签
@@ -147,16 +150,17 @@ public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer
                     articleList.add(newsInfo);
                     // 打印高亮标签追加完成后的实体对象
                 }
+                // 防止出现：远程主机强迫关闭了一个现有的连接
+///          Thread.sleep(10000);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            int total = articleList.size();
             pageResponse.setRecordsFiltered(total);
             pageResponse.setRecordsTotal(total);
-            pageResponse.setPageNum(pageNum+1);
+            pageResponse.setPageNum(pageNum + 1);
             pageResponse.setPageSize(pageSize);
             pageResponse.setTotal(total);
-            pageResponse.setData(articleList.size()==0?null:articleList);
+            pageResponse.setData(articleList.size() == 0 ? null : articleList);
             return pageResponse;
         }
     }
