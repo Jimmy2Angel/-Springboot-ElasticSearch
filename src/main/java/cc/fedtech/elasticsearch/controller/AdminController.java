@@ -4,6 +4,9 @@ import cc.fedtech.elasticsearch.data.JsonResult;
 import cc.fedtech.elasticsearch.data.PageResponse;
 import cc.fedtech.elasticsearch.entity.Article;
 import cc.fedtech.elasticsearch.service.ArticleService;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.TimeInterval;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -11,6 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * @author: lollipop
@@ -20,11 +29,38 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("a/article")
 public class AdminController {
 
+    private static final Logger LOGGER = Logger.getLogger(AdminController.class.getName());
+
+    /**
+     * 已调用获取掘金文章的次数
+     */
+    private int index = 1;
+    /**
+     * 预计调用掘金接口次数
+     */
+    private static final int THE_CALLS_NUMBER = 100;
+    /**
+     * 获取掘金文章接口url
+     */
+    private static final String GET_ARTICLE_URL = "https://timeline-merger-ms.juejin.im/v1/get_entry_by_rank?src=web&limit=50&category=all&before=";
+    /**
+     * 标记上次获取到的最后一篇文章，用于下次接着此篇文章获取
+     */
+    private String lastRankIndex = "";
+    /**
+     * 线程池用于保存文章到es
+     */
+    private ExecutorService executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+            60L, TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            ThreadUtil.newNamedThreadFactory("save-article-pool-", true));
+
     @Autowired
     private ArticleService articleService;
 
     /**
      * 跳转后台首页
+     *
      * @return
      */
     @GetMapping(value = {"", "index"})
@@ -34,6 +70,7 @@ public class AdminController {
 
     /**
      * 分页获取文章列表数据
+     *
      * @param pageNum
      * @param pageSize
      * @return
@@ -47,6 +84,7 @@ public class AdminController {
 
     /**
      * 跳转文章新增／编辑页面
+     *
      * @param id
      * @param model
      * @return
@@ -61,6 +99,7 @@ public class AdminController {
 
     /**
      * 新增文章
+     *
      * @param article
      * @return
      */
@@ -78,6 +117,7 @@ public class AdminController {
 
     /**
      * 编辑文章
+     *
      * @param article
      * @return
      */
@@ -95,6 +135,7 @@ public class AdminController {
 
     /**
      * 删除文章
+     *
      * @param id
      * @return
      */
@@ -107,6 +148,7 @@ public class AdminController {
 
     /**
      * 删除全部文章
+     *
      * @return
      */
     @PostMapping("deleteAll")
@@ -117,52 +159,73 @@ public class AdminController {
     }
 
     /**
-     * 批量获取倔强上后端文章保存到 es
+     * 批量获取掘金上文章保存到 es
+     *
      * @return
      */
     @GetMapping("batchSave")
     @ResponseBody
-    public boolean batchSave() {
-        String url = "https://timeline-merger-ms.juejin.im/v1/get_entry_by_rank?src=web&limit=20&category=5562b419e4b00c57d9b94ae2";
-        if (!"".equals(lastRankIndex)) {
-            url = url + "&before=" + lastRankIndex;
-        }
-        return test(url);
+    public long batchSave() {
+        TimeInterval timer = DateUtil.timer();
+        batchSaveToES();
+        return timer.intervalRestart();
     }
 
-    private int index = 1;
-    private String lastRankIndex = "";
-
-    private boolean test (String url) {
+    /**
+     * 调用掘金接口，解析获取的文章集合，保存到 es
+     */
+    private void batchSaveToES() {
+        String url = GET_ARTICLE_URL;
+        url = "".equals(lastRankIndex) ? url : (GET_ARTICLE_URL + lastRankIndex);
         String content = HttpUtil.get(url);
-        System.out.println(index++ + " : " + content);
+        LOGGER.info(index + " : " + content);
         JSONObject resultObject = JSONObject.parseObject(content);
         JSONArray entryArray;
         try {
-            entryArray = resultObject.getJSONObject("d").getJSONArray("entrylist");
-            assert entryArray != null;
-            for (int i = 0; i < entryArray.size(); i++) {
-                JSONObject jsonObject = entryArray.getJSONObject(i);
-                Article article = new Article();
-                article.setAuthor(jsonObject.getJSONObject("user").getString("username"));
-                article.setTitle(jsonObject.getString("title"));
-                article.setAbstracts(jsonObject.getString("summaryInfo"));
-                article.setContent(jsonObject.getString("content"));
-                article.setUrl(jsonObject.getString("originalUrl"));
-                articleService.addArticle(article);
-                lastRankIndex = jsonObject.getString("rankIndex");
-                if (index == 50000) {
-                    break;
-                }
-                if (i == entryArray.size() - 1) {
-                    test(url + "&before=" + lastRankIndex);
+            if (index == THE_CALLS_NUMBER) {
+                executorService.shutdown();
+            } else {
+                index++;
+                //调用一次接口获取50篇文章
+                entryArray = resultObject.getJSONObject("d").getJSONArray("entrylist");
+                assert entryArray != null;
+                for (int i = 0; i < entryArray.size(); i++) {
+                    JSONObject jsonObject = entryArray.getJSONObject(i);
+                    executorService.execute(() -> saveOneArticle(jsonObject));
+                    lastRankIndex = jsonObject.getString("rankIndex");
+                    //如果是该次调用获取到最后一篇文章，则根据 rankIndex 再次调用接口
+                    if (i == entryArray.size() - 1) {
+                        batchSaveToES();
+                    }
                 }
             }
         } catch (Exception e) {
-            System.out.println("lastRankIndex : " + lastRankIndex);
-            return false;
+            //调用掘金接口可能会出现异常，需要等待3s后根据上次的 rankIndex 重新调用接口
+            e.printStackTrace();
+            LOGGER.warning("CATCH EXCEPTION!!! CATCH EXCEPTION!!! CATCH EXCEPTION!!!");
+            try {
+                Thread.sleep(3000);
+                batchSaveToES();
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
         }
-        return true;
+    }
+
+    /**
+     * 保存单篇文章到 es
+     *
+     * @param jsonObject
+     * @return
+     */
+    private boolean saveOneArticle(JSONObject jsonObject) {
+        Article article = new Article();
+        article.setAuthor(jsonObject.getJSONObject("user").getString("username"));
+        article.setTitle(jsonObject.getString("title"));
+        article.setAbstracts(jsonObject.getString("summaryInfo"));
+        article.setContent(jsonObject.getString("content"));
+        article.setUrl(jsonObject.getString("originalUrl"));
+        return articleService.addArticle(article);
     }
 
 }

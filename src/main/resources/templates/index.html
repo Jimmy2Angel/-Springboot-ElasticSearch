@@ -43,8 +43,8 @@
                 , count: res[0].total
                 , theme: '#1E9FFF'
                 , curr: res[0].pageNum
-                , layout: [ 'prev', 'page', 'next', 'skip']
-                , groups: 3 //连续显示分页数
+                ,last: false
+                , groups: 10 //连续显示分页数
                 , jump: function (obj, first) {
                     if (!first) {
                         $("#articleList").html("");

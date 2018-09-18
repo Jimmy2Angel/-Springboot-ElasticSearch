@@ -65,8 +65,8 @@
                 , count: res.total
                 , theme: '#1E9FFF'
                 , curr: res.pageNum
-                , layout: [ 'prev', 'page', 'next', 'skip']
-                , groups: 3 //连续显示分页数
+                ,last: false
+                , groups: 10 //连续显示分页数
                 , jump: function (obj, first) {
                     if (!first) {
                         putData(obj.curr);
