@@ -1,4 +1,4 @@
-package cc.fedtech.elasticsearch;
+package com.lollipop.elasticsearch;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

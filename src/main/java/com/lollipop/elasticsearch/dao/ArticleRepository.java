@@ -1,6 +1,6 @@
-package cc.fedtech.elasticsearch.dao;
+package com.lollipop.elasticsearch.dao;
 
-import cc.fedtech.elasticsearch.entity.Article;
+import com.lollipop.elasticsearch.entity.Article;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 /**

@@ -1,9 +1,9 @@
-package cc.fedtech.elasticsearch.service.impl;
+package com.lollipop.elasticsearch.service.impl;
 
-import cc.fedtech.elasticsearch.dao.ArticleRepository;
-import cc.fedtech.elasticsearch.data.PageResponse;
-import cc.fedtech.elasticsearch.entity.Article;
-import cc.fedtech.elasticsearch.service.ArticleService;
+import com.lollipop.elasticsearch.dao.ArticleRepository;
+import com.lollipop.elasticsearch.data.PageResponse;
+import com.lollipop.elasticsearch.entity.Article;
+import com.lollipop.elasticsearch.service.ArticleService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;

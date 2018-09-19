@@ -1,4 +1,4 @@
-package cc.fedtech.elasticsearch.data;
+package com.lollipop.elasticsearch.data;
 
 import java.util.List;
 

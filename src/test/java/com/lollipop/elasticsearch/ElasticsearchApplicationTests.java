@@ -1,4 +1,4 @@
-package cc.fedtech.elasticsearch;
+package com.lollipop.elasticsearch;
 
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;

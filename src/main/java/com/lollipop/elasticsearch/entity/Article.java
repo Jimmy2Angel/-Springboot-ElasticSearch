@@ -1,4 +1,4 @@
-package cc.fedtech.elasticsearch.entity;
+package com.lollipop.elasticsearch.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;

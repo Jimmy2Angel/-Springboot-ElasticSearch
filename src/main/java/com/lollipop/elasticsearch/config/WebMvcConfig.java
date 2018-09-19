@@ -1,4 +1,4 @@
-package cc.fedtech.elasticsearch.config;
+package com.lollipop.elasticsearch.config;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,7 +26,7 @@ import java.util.List;
  */
 @EnableWebMvc
 @ComponentScan(
-        basePackages = {"cc.fedtech.elasticsearch.controller"}
+        basePackages = {"com.lollipop.elasticsearch.controller"}
 )
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurerAdapter {

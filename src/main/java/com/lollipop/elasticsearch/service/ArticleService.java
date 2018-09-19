@@ -1,7 +1,7 @@
-package cc.fedtech.elasticsearch.service;
+package com.lollipop.elasticsearch.service;
 
-import cc.fedtech.elasticsearch.data.PageResponse;
-import cc.fedtech.elasticsearch.entity.Article;
+import com.lollipop.elasticsearch.data.PageResponse;
+import com.lollipop.elasticsearch.entity.Article;
 import com.alibaba.fastjson.JSONArray;
 
 /**

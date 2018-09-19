@@ -1,7 +1,7 @@
-package cc.fedtech.elasticsearch;
+package com.lollipop.elasticsearch;
 
-import cc.fedtech.elasticsearch.dao.ArticleRepository;
-import cc.fedtech.elasticsearch.entity.Article;
+import com.lollipop.elasticsearch.dao.ArticleRepository;
+import com.lollipop.elasticsearch.entity.Article;
 import com.alibaba.fastjson.JSONObject;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;

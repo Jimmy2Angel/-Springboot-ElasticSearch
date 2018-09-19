@@ -1,8 +1,8 @@
-package cc.fedtech.elasticsearch.controller;
+package com.lollipop.elasticsearch.controller;
 
-import cc.fedtech.elasticsearch.data.PageResponse;
-import cc.fedtech.elasticsearch.entity.Article;
-import cc.fedtech.elasticsearch.service.ArticleService;
+import com.lollipop.elasticsearch.data.PageResponse;
+import com.lollipop.elasticsearch.entity.Article;
+import com.lollipop.elasticsearch.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

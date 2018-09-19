@@ -1,9 +1,9 @@
-package cc.fedtech.elasticsearch.controller;
+package com.lollipop.elasticsearch.controller;
 
-import cc.fedtech.elasticsearch.data.JsonResult;
-import cc.fedtech.elasticsearch.data.PageResponse;
-import cc.fedtech.elasticsearch.entity.Article;
-import cc.fedtech.elasticsearch.service.ArticleService;
+import com.lollipop.elasticsearch.data.JsonResult;
+import com.lollipop.elasticsearch.data.PageResponse;
+import com.lollipop.elasticsearch.entity.Article;
+import com.lollipop.elasticsearch.service.ArticleService;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;
