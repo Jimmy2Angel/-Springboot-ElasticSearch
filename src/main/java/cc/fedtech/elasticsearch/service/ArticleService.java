@@ -2,8 +2,7 @@ package cc.fedtech.elasticsearch.service;
 
 import cc.fedtech.elasticsearch.data.PageResponse;
 import cc.fedtech.elasticsearch.entity.Article;
-
-import java.util.List;
+import com.alibaba.fastjson.JSONArray;
 
 /**
  * @author: lollipop
@@ -35,6 +34,13 @@ public interface ArticleService {
      * @return
      */
     boolean addArticle(Article article);
+
+    /**
+     * 批量新增文章
+     * @param jsonArray
+     * @return
+     */
+    void addArticles(JSONArray jsonArray);
 
     /**
      * 后台删除文章

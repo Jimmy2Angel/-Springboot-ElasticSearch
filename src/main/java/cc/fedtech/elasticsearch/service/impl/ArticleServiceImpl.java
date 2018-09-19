@@ -4,7 +4,9 @@ import cc.fedtech.elasticsearch.dao.ArticleRepository;
 import cc.fedtech.elasticsearch.data.PageResponse;
 import cc.fedtech.elasticsearch.entity.Article;
 import cc.fedtech.elasticsearch.service.ArticleService;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -219,6 +221,26 @@ public class ArticleServiceImpl implements ArticleService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void addArticles(JSONArray entryArray) {
+        List<Article> articleList = Lists.newArrayList();
+        for (int i = 0; i < entryArray.size(); i++) {
+            JSONObject jsonObject = entryArray.getJSONObject(i);
+            Article article = new Article();
+            article.setAuthor(jsonObject.getJSONObject("user").getString("username"));
+            article.setTitle(jsonObject.getString("title"));
+            article.setAbstracts(jsonObject.getString("summaryInfo"));
+            article.setContent(jsonObject.getString("content"));
+            article.setUrl(jsonObject.getString("originalUrl"));
+
+            article.setId(new Random().nextLong());
+            article.setClickCount(0L);
+            article.setPostTime(new Date());
+            articleList.add(article);
+        }
+        articleRepository.save(articleList);
     }
 
     @Override

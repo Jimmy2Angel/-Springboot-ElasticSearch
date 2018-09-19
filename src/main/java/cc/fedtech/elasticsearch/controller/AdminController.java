@@ -4,8 +4,6 @@ import cc.fedtech.elasticsearch.data.JsonResult;
 import cc.fedtech.elasticsearch.data.PageResponse;
 import cc.fedtech.elasticsearch.entity.Article;
 import cc.fedtech.elasticsearch.service.ArticleService;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.date.TimeInterval;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -159,44 +157,29 @@ public class AdminController {
     }
 
     /**
-     * 批量获取掘金上文章保存到 es
+     * 调用掘金接口，解析获取的文章集合，保存到 es
      *
      * @return
      */
     @GetMapping("batchSave")
     @ResponseBody
-    public long batchSave() {
-        TimeInterval timer = DateUtil.timer();
-        batchSaveToES();
-        return timer.intervalRestart();
-    }
-
-    /**
-     * 调用掘金接口，解析获取的文章集合，保存到 es
-     */
-    private void batchSaveToES() {
-        String url = "".equals(lastRankIndex) ? GET_ARTICLE_URL : (GET_ARTICLE_URL + lastRankIndex);
-        String content = HttpUtil.get(url);
-        LOGGER.info(index + " : " + content);
-        JSONObject resultObject = JSONObject.parseObject(content);
-        JSONArray entryArray;
+    public boolean batchSaveToES() {
         try {
-            if (index == THE_CALLS_NUMBER) {
+            if (index > THE_CALLS_NUMBER) {
                 executorService.shutdown();
             } else {
+                String content = HttpUtil.get(GET_ARTICLE_URL + lastRankIndex);
+                LOGGER.info(index + " : " + content);
+                JSONObject resultObject = JSONObject.parseObject(content);
                 index++;
                 //调用一次接口获取50篇文章
-                entryArray = resultObject.getJSONObject("d").getJSONArray("entrylist");
+                JSONArray entryArray = resultObject.getJSONObject("d").getJSONArray("entrylist");
                 assert entryArray != null;
-                for (int i = 0; i < entryArray.size(); i++) {
-                    JSONObject jsonObject = entryArray.getJSONObject(i);
-                    executorService.execute(() -> saveOneArticle(jsonObject));
-                    lastRankIndex = jsonObject.getString("rankIndex");
-                    //如果是该次调用获取到最后一篇文章，则根据 rankIndex 再次调用接口
-                    if (i == entryArray.size() - 1) {
-                        batchSaveToES();
-                    }
-                }
+                //保存这次获取到的文章
+                executorService.execute(() -> articleService.addArticles(entryArray));
+                //根据这次获取到的最后一篇文章的 rankIndex 再次调用接口
+                lastRankIndex = entryArray.getJSONObject(entryArray.size() - 1).getString("rankIndex");
+                executorService.execute(this::batchSaveToES);
             }
         } catch (Exception e) {
             //调用掘金接口可能会出现异常，需要等待3s后根据上次的 rankIndex 重新调用接口
@@ -209,22 +192,6 @@ public class AdminController {
                 e1.printStackTrace();
             }
         }
+        return true;
     }
-
-    /**
-     * 保存单篇文章到 es
-     *
-     * @param jsonObject
-     * @return
-     */
-    private boolean saveOneArticle(JSONObject jsonObject) {
-        Article article = new Article();
-        article.setAuthor(jsonObject.getJSONObject("user").getString("username"));
-        article.setTitle(jsonObject.getString("title"));
-        article.setAbstracts(jsonObject.getString("summaryInfo"));
-        article.setContent(jsonObject.getString("content"));
-        article.setUrl(jsonObject.getString("originalUrl"));
-        return articleService.addArticle(article);
-    }
-
 }
