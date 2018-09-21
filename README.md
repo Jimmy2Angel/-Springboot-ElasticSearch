@@ -4,31 +4,9 @@
 
 由于存在版本不兼容的问题，此 demo 采用版本如下
 
-1. springboot ： 1.5.8.RELEASE
-2. elasticsearch：2.4.0
-3. ik 分词器：1.9.5（启动时报错，可修改 ik 插件下配置文件中 es 的版本为 2.4.0）
-
-## springboot相关
-
-### 热部署
-
-添加依赖
-
-```java
-<dependency>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-devtools</artifactId>
-	<optional>true</optional> <!-- 这个需要为 true 热部署才有效 -->
-</dependency>
-```
-
-这样就可以不用手动重启应用了，监测到代码有变化会自动重启应用，并且这个重启比手动重启要快很多。
-
-配合 chrome 浏览器 liveReload 插件（监测页面有变化自动刷新页面）可以实现边写代码边看效果。
-
-### Thymeleaf 模版
-
-thymeleaf 作为官方推荐的模板引擎，自有它的优点，这里不做多说。springboot 无需其它配置 controller 返回视图名默认查找 templates 路径下的 html。
+1. springboot ： 2.0.3.RELEASE
+2. elasticsearch：5.5.1
+3. analysis-ik：5.5.1
 
 ## ElasticSearch相关
 
@@ -36,7 +14,7 @@ thymeleaf 作为官方推荐的模板引擎，自有它的优点，这里不做�
 
 在 application.yml 文件中配置如下
 
-```java
+```
 spring:
    data:
       elasticsearch:
@@ -52,11 +30,18 @@ spring:
 
 ### IK分词器
 
-在 es 路径下 plugins 文件夹下新建 ik 文件夹，将下载好的 ik 压缩包解压放在此处即可。
+- 方法一：在 es 路径下 plugins 文件夹下新建 ik 文件夹，将下载好的 ik 压缩包解压放在此处即可。
+
+- 方法二：在 es 路径下执行命令
+
+  ```
+  ./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v5.5.1/elasticsearch-analysis-ik-5.5.1.zip
+  ```
+
 
 ### 关键词搜索高亮
 
-spring-data-es 尝试了一番，但是好像不支持，最终还是用 原生的 es 实现了改功能。代码如下：
+代码如下：
 
 ```java
 private static final String INDEX_NAME = "elasticsearch";
@@ -103,8 +88,9 @@ public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer
                 // 按照字段排序
                 searchRequestBuilder.addSort("postTime", SortOrder.DESC);
                 // 设置高亮显示
-                searchRequestBuilder.addHighlightedField("title").addHighlightedField("abstracts");
-                searchRequestBuilder.setHighlighterPreTags(PRE_TAG).setHighlighterPostTags(POST_TAG);
+                HighlightBuilder highlightBuilder = new HighlightBuilder();
+                highlightBuilder.field("title").field("abstracts").preTags(PRE_TAG).postTags(POST_TAG);
+                searchRequestBuilder.highlighter(highlightBuilder);
                 // 执行搜索,返回搜索响应信息
                 SearchResponse response = searchRequestBuilder.execute().actionGet();
 
@@ -118,10 +104,9 @@ public PageResponse<Article> searchArticleWithHighlight(Integer pageNum, Integer
                     // 将文档中的每一个对象转换json串值
                     String json = hit.getSourceAsString();
                     // 将json串值转换成对应的实体对象
-                    Article newsInfo = JSONObject
-                            .parseObject(json, Article.class);
+                    Article newsInfo = JSONUtil.toBean(json, Article.class);
                     // 获取对应的高亮域
-                    Map<String, HighlightField> result = hit.highlightFields();
+                    Map<String, HighlightField> result = hit.getHighlightFields();
                     // 从设定的高亮域中取得指定域
                     HighlightField titleField = result.get("title");
                     if (titleField != null) {
