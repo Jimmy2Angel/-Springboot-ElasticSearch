@@ -1,8 +1,8 @@
 package com.lollipop.elasticsearch;
 
+import cn.hutool.json.JSONUtil;
 import com.lollipop.elasticsearch.dao.ArticleRepository;
 import com.lollipop.elasticsearch.entity.Article;
-import com.alibaba.fastjson.JSONObject;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -10,7 +10,8 @@ import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.highlight.HighlightField;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,11 +70,9 @@ public class ArticleTest extends ElasticsearchApplicationTests{
             // 按照字段排序
             searchRequestBuilder.addSort("postTime", SortOrder.DESC);
             // 设置高亮显示
-            searchRequestBuilder.addHighlightedField("title");
-            searchRequestBuilder.addHighlightedField("content");
-            searchRequestBuilder
-                    .setHighlighterPreTags("<span style=\"color:red\">");
-            searchRequestBuilder.setHighlighterPostTags("</span>");
+            HighlightBuilder highlightBuilder = new HighlightBuilder();
+            highlightBuilder.field("title").field("content").preTags("<span style=\"color:red\">").postTags("</span>");
+            searchRequestBuilder.highlighter(highlightBuilder);
 //          searchRequestBuilder.setHighlighterPreTags("<em>");
 //          searchRequestBuilder.setHighlighterPostTags("<em>");
             // 执行搜索,返回搜索响应信息
@@ -89,8 +88,7 @@ public class ArticleTest extends ElasticsearchApplicationTests{
                 // 将文档中的每一个对象转换json串值
                 String json = hit.getSourceAsString();
                 // 将json串值转换成对应的实体对象
-                Article newsInfo = JSONObject
-                        .parseObject(json, Article.class);
+                Article newsInfo = JSONUtil.toBean(json, Article.class);
                 // 获取对应的高亮域
                 Map<String, HighlightField> result = hit.highlightFields();
                 // 从设定的高亮域中取得指定域

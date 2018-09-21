@@ -1,23 +1,26 @@
 package com.lollipop.elasticsearch.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.lollipop.elasticsearch.dao.ArticleRepository;
 import com.lollipop.elasticsearch.data.PageResponse;
 import com.lollipop.elasticsearch.entity.Article;
 import com.lollipop.elasticsearch.service.ArticleService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.common.text.Text;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.highlight.HighlightField;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,20 +61,21 @@ public class ArticleServiceImpl implements ArticleService {
         List<Article> articleList;
         // 分页参数
         pageNum = pageNum == 0 ? pageNum : pageNum - 1;
-        Pageable pageable = new PageRequest(pageNum, pageSize);
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
         int total = 0;
         if ("".equals(searchContent) || searchContent == null) {
             return findAllByPaging(pageNum, pageSize);
         } else {
             // Function Score Query
-            FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery()
-                    .add(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("title", searchContent)),
-                            ScoreFunctionBuilders.weightFactorFunction(100))
-                    .add(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("abstracts", searchContent)),
-                            ScoreFunctionBuilders.weightFactorFunction(50))
-                    .add(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("content", searchContent)),
-                            ScoreFunctionBuilders.weightFactorFunction(10))
-                    .scoreMode("sum").setMinScore(20);
+            BoolQueryBuilder boolQueryBuilder1 = QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("title", searchContent)).boost(100);
+            BoolQueryBuilder boolQueryBuilder2 = QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("abstracts", searchContent)).boost(50);
+            BoolQueryBuilder boolQueryBuilder3 = QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("content", searchContent)).boost(10);
+            FunctionScoreQueryBuilder.FilterFunctionBuilder[] filterFunctionBuilders = new FunctionScoreQueryBuilder.FilterFunctionBuilder[]{
+                    new FunctionScoreQueryBuilder.FilterFunctionBuilder(boolQueryBuilder1, ScoreFunctionBuilders.weightFactorFunction(100)),
+                    new FunctionScoreQueryBuilder.FilterFunctionBuilder(boolQueryBuilder2, ScoreFunctionBuilders.weightFactorFunction(50)),
+                    new FunctionScoreQueryBuilder.FilterFunctionBuilder(boolQueryBuilder3, ScoreFunctionBuilders.weightFactorFunction(10)),
+            };
+            FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery(filterFunctionBuilders);
 
             // 创建搜索 DSL 查询
             SearchQuery searchQuery = new NativeSearchQueryBuilder()
@@ -134,8 +138,9 @@ public class ArticleServiceImpl implements ArticleService {
                 // 按照字段排序
                 searchRequestBuilder.addSort("postTime", SortOrder.DESC);
                 // 设置高亮显示
-                searchRequestBuilder.addHighlightedField("title").addHighlightedField("abstracts");
-                searchRequestBuilder.setHighlighterPreTags(PRE_TAG).setHighlighterPostTags(POST_TAG);
+                HighlightBuilder highlightBuilder = new HighlightBuilder();
+                highlightBuilder.field("title").field("abstracts").preTags(PRE_TAG).postTags(POST_TAG);
+                searchRequestBuilder.highlighter(highlightBuilder);
                 // 执行搜索,返回搜索响应信息
                 SearchResponse response = searchRequestBuilder.execute().actionGet();
 
@@ -149,10 +154,9 @@ public class ArticleServiceImpl implements ArticleService {
                     // 将文档中的每一个对象转换json串值
                     String json = hit.getSourceAsString();
                     // 将json串值转换成对应的实体对象
-                    Article newsInfo = JSONObject
-                            .parseObject(json, Article.class);
+                    Article newsInfo = JSONUtil.toBean(json, Article.class);
                     // 获取对应的高亮域
-                    Map<String, HighlightField> result = hit.highlightFields();
+                    Map<String, HighlightField> result = hit.getHighlightFields();
                     // 从设定的高亮域中取得指定域
                     HighlightField titleField = result.get("title");
                     if (titleField != null) {
@@ -197,7 +201,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private PageResponse<Article> findAllByPaging(Integer pageNum, Integer pageSize) {
-        List<Article> articleList = articleRepository.findAll(new PageRequest(pageNum, pageSize)).getContent();
+        List<Article> articleList = articleRepository.findAll(PageRequest.of(pageNum, pageSize)).getContent();
         int total = (int) articleRepository.count();
         PageResponse<Article> pageResponse = new PageResponse<>();
         pageResponse.setRecordsFiltered(total);
@@ -225,47 +229,50 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public void addArticles(JSONArray entryArray) {
-        List<Article> articleList = Lists.newArrayList();
+        List<Article> articleList = CollUtil.newArrayList();
         for (int i = 0; i < entryArray.size(); i++) {
             JSONObject jsonObject = entryArray.getJSONObject(i);
             Article article = new Article();
-            article.setAuthor(jsonObject.getJSONObject("user").getString("username"));
-            article.setTitle(jsonObject.getString("title"));
-            article.setAbstracts(jsonObject.getString("summaryInfo"));
-            article.setContent(jsonObject.getString("content"));
-            article.setUrl(jsonObject.getString("originalUrl"));
+            article.setAuthor(jsonObject.getJSONObject("user").getStr("username"));
+            article.setTitle(jsonObject.getStr("title"));
+            article.setAbstracts(jsonObject.getStr("summaryInfo"));
+            article.setContent(jsonObject.getStr("content"));
+            article.setUrl(jsonObject.getStr("originalUrl"));
 
             article.setId(new Random().nextLong());
             article.setClickCount(0L);
             article.setPostTime(new Date());
             articleList.add(article);
         }
-        articleRepository.save(articleList);
+        articleRepository.saveAll(articleList);
     }
 
     @Override
     public void deleteById(Long id) {
-        articleRepository.delete(id);
+        articleRepository.deleteById(id);
     }
 
     @Override
-    public Article findOne(Long id) {
-        Article article = articleRepository.findOne(id);
-        if (article != null) {
-            article.setClickCount(article.getClickCount() + 1);
-            articleRepository.save(article);
+    public Article findById(Long id, boolean addOneClickCount) {
+        Optional<Article> optional = articleRepository.findById(id);
+        Article article = null;
+        if (optional.isPresent()) {
+            article = optional.get();
+            if (addOneClickCount) {
+                article.setClickCount(article.getClickCount() + 1);
+                articleRepository.save(article);
+            }
         }
         return article;
     }
 
     @Override
-    public Article getById(Long id) {
-        return articleRepository.findOne(id);
-    }
-
-    @Override
     public boolean updateArticle(Article article) {
-        Article selectArticle = articleRepository.findOne(article.getId());
+        Optional<Article> optional = articleRepository.findById(article.getId());
+        if (!optional.isPresent()) {
+            return false;
+        }
+        Article selectArticle = optional.get();
         selectArticle.setAuthor(article.getAuthor());
         selectArticle.setAbstracts(article.getAbstracts());
         selectArticle.setContent(article.getContent());

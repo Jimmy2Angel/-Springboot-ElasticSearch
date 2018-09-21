@@ -13,29 +13,32 @@ import java.util.Date;
  * @author: lollipop
  * @date: 17/11/2
  */
-@Document(indexName="elastic_v1",type="article",indexStoreType="fs",shards=5,replicas=1,refreshInterval="-1")
+@Document(indexName="elastic_v1",type="article",indexStoreType="fs",refreshInterval="-1")
 public class Article implements Serializable {
     @Id
     private Long id;
     /**标题*/
-    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.String)
+    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.Text)
     private String title;
     /**摘要*/
-    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.String)
+    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.Text)
     private String abstracts;
     /**内容*/
-    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.String)
+    @Field(analyzer = "ik_max_word", searchAnalyzer = "ik_max_word", type = FieldType.Text)
     private String content;
     /**发表时间*/
     @JsonFormat (shape = JsonFormat.Shape.STRING, pattern ="yyyy-MM-dd HH:mm:ss")
+    @Field(type = FieldType.Date)
     private Date postTime;
     /**点击率*/
+    @Field(index = false)
     private Long clickCount;
     /**作者*/
     private String author;
     /**所属教程*/
     private String tutorial;
     /**原文章地址*/
+    @Field(index = false)
     private String url;
 
     public Long getId() {

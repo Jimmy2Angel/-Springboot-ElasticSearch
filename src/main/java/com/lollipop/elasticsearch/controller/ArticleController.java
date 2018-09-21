@@ -63,7 +63,7 @@ public class ArticleController {
      */
     @GetMapping("{id}")
     public String findById(@PathVariable Long id, Model model) {
-        Article searchResult = articleService.findOne(id);
+        Article searchResult = articleService.findById(id, true);
         if (searchResult != null) {
             model.addAttribute("article", searchResult);
         }

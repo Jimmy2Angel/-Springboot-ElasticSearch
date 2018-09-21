@@ -1,8 +1,8 @@
 package com.lollipop.elasticsearch.service;
 
+import cn.hutool.json.JSONArray;
 import com.lollipop.elasticsearch.data.PageResponse;
 import com.lollipop.elasticsearch.entity.Article;
-import com.alibaba.fastjson.JSONArray;
 
 /**
  * @author: lollipop
@@ -49,18 +49,12 @@ public interface ArticleService {
     void deleteById(Long id);
 
     /**
-     * 根据id获取一篇文章, 点击量加1
-     * @param id
+     * 根据id获取一篇文章
+     * @param id 文章id
+     * @param addOneClickCount 是否增加1点击量
      * @return
      */
-    Article findOne(Long id);
-
-    /**
-     * 根据id获取一篇文章, 点击量不变
-     * @param id
-     * @return
-     */
-    Article getById(Long id);
+    Article findById(Long id, boolean addOneClickCount);
 
     /**
      * 后台修改文章

@@ -1,13 +1,14 @@
 package com.lollipop.elasticsearch.controller;
 
+import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.lollipop.elasticsearch.data.JsonResult;
 import com.lollipop.elasticsearch.data.PageResponse;
 import com.lollipop.elasticsearch.entity.Article;
 import com.lollipop.elasticsearch.service.ArticleService;
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -90,7 +91,7 @@ public class AdminController {
     @GetMapping("add")
     public String add(Long id, Model model) {
         if (id != null) {
-            model.addAttribute("article", articleService.getById(id));
+            model.addAttribute("article", articleService.findById(id, false));
         }
         return "admin/article_add";
     }
@@ -170,7 +171,7 @@ public class AdminController {
             } else {
                 String content = HttpUtil.get(GET_ARTICLE_URL + lastRankIndex);
                 LOGGER.info(index + " : " + content);
-                JSONObject resultObject = JSONObject.parseObject(content);
+                JSONObject resultObject = JSONUtil.parseObj(content);
                 index++;
                 //调用一次接口获取50篇文章
                 JSONArray entryArray = resultObject.getJSONObject("d").getJSONArray("entrylist");
@@ -178,7 +179,7 @@ public class AdminController {
                 //保存这次获取到的文章
                 executorService.execute(() -> articleService.addArticles(entryArray));
                 //根据这次获取到的最后一篇文章的 rankIndex 再次调用接口
-                lastRankIndex = entryArray.getJSONObject(entryArray.size() - 1).getString("rankIndex");
+                lastRankIndex = entryArray.getJSONObject(entryArray.size() - 1).getStr("rankIndex");
                 executorService.execute(this::batchSaveToES);
             }
         } catch (Exception e) {
