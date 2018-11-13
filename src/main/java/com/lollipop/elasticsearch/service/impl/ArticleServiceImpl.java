@@ -1,6 +1,7 @@
 package com.lollipop.elasticsearch.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -149,8 +150,7 @@ public class ArticleServiceImpl implements ArticleService {
                 SearchHit[] hits = searchHits.getHits();
                 total = (int) searchHits.getTotalHits();
                 // ObjectMapper mapper = new ObjectMapper();
-                for (int i = 0; i < hits.length; i++) {
-                    SearchHit hit = hits[i];
+                for (SearchHit hit : hits) {
                     // 将文档中的每一个对象转换json串值
                     String json = hit.getSourceAsString();
                     // 将json串值转换成对应的实体对象
@@ -216,7 +216,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public boolean addArticle(Article article) {
         article.setId(new Random().nextLong());
-        article.setClickCount(0L);
+        article.setClickCount(0);
         article.setPostTime(new Date());
         try {
             articleRepository.save(article);
@@ -240,8 +240,8 @@ public class ArticleServiceImpl implements ArticleService {
             article.setUrl(jsonObject.getStr("originalUrl"));
 
             article.setId(new Random().nextLong());
-            article.setClickCount(0L);
-            article.setPostTime(new Date());
+            article.setClickCount(jsonObject.getInt("viewsCount"));
+            article.setPostTime(DateUtil.parse(jsonObject.getStr("createdAt"), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
             articleList.add(article);
         }
         articleRepository.saveAll(articleList);
