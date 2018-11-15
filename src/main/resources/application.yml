@@ -13,4 +13,6 @@ spring:
           #data: ./elasticsearch/data #elasticsearch数据存储目录
   thymeleaf:
     cache: false
+logging:
+  config: classpath:log4j2.xml
 

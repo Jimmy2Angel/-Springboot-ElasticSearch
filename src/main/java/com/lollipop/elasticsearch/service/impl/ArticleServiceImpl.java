@@ -1,6 +1,5 @@
 package com.lollipop.elasticsearch.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -229,7 +228,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public void addArticles(JSONArray entryArray) {
-        List<Article> articleList = CollUtil.newArrayList();
+        List<Article> articleList = new ArrayList<>();
         for (int i = 0; i < entryArray.size(); i++) {
             JSONObject jsonObject = entryArray.getJSONObject(i);
             Article article = new Article();
